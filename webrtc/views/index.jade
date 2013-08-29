@@ -1,6 +1,13 @@
 h1= title
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="javascripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="javascripts/utils.js"></script>
 <script type="text/javascript" src="javascripts/adapter.js"></script>
 <script type="text/javascript" src="javascripts/webrtc.js"></script>
 p Welcome to #{title}
-p <button onclick="init()">Init</button>
+p <button onclick="WebRTC.init()">Init</button>
+ <button onclick="WebRTC.stop()">Stop</button>
+
+p  <video id="localVideo" autoplay height="200" width="200"></video>
+p  <video id="remoteVideo" autoplay height="200" width="200"></video>
 <audio id="audio2" autoplay="autoplay"></audio>
