@@ -33,7 +33,8 @@ WebRTC={
     // Call the polyfill wrapper to attach the media stream to this element.
     localstream = stream;
     host_local_pc.addStream(localstream);
-    trace("Adding Local Stream to peer connection");    
+    trace("Adding Local Stream to peer connection");  
+    $("#localdiv").show();  
     document.getElementById("localVideo").src = URL.createObjectURL(stream);
     Utils.initSessionWithName('zia');
   },
@@ -78,6 +79,8 @@ WebRTC={
   //attachMediaStream(audio2, e.stream);
   remotestream=event.stream;
   trace("Received remote stream");
+  $("#remotediv").show(); 
+  $("#session-controls").show(); 
   document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
  // enableDtmfSender();
   },
@@ -100,6 +103,26 @@ WebRTC={
   },
   addICECandidate:function(cand){
     host_local_pc.addIceCandidate(new RTCIceCandidate(JSON.parse(cand)));
+  },
+  toggleCamera:function(){
+    vtrack=localstream.getVideoTracks()[0];
+    vtrack.enabled=!vtrack.enabled;
+    if(vtrack.enabled)
+    {
+      $("#btnCam").html("Camera");
+    }else{
+      $("#btnCam").html("<strike>Camera</strike>");
+    }
+  },
+  toggleMic:function(){
+    atrack=localstream.getAudioTracks()[0];
+    atrack.enabled=!atrack.enabled;
+    if(atrack.enabled)
+    {
+      $("#btnMic").html("Microphone");
+    }else{
+      $("#btnMic").html("<strike>Microphone</strike>");
+    }
   }
 }
 

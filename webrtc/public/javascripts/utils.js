@@ -1,8 +1,9 @@
 $(document).ready(function(){
+	$(".drag").draggable();
+	//$(".resizable").resizable();
 	Utils.initSocketIO();
 	}
 );
-
 
 var remote_desc;
 var client_id;
@@ -10,7 +11,7 @@ var host_id;
 var Utils={
 	socket:null,
 	initSocketIO: function(){
-		Utils.socket = io.connect('http://rtc.att.io');
+		Utils.socket = io.connect('http://'+window.location.host);
 		Utils.socket.on('connect',function(data){
 			console.log("Connected: "+Utils.socket.socket.sessionid);
 		});

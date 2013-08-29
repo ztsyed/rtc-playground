@@ -1,13 +1,26 @@
 h1= title
 <script src="/socket.io/socket.io.js"></script>
-<script type="text/javascript" src="javascripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/javascripts/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="javascripts/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="javascripts/utils.js"></script>
 <script type="text/javascript" src="javascripts/adapter.js"></script>
 <script type="text/javascript" src="javascripts/webrtc.js"></script>
-p Welcome to #{title}
-p <button onclick="WebRTC.init()">Init</button>
- <button onclick="WebRTC.stop()">Stop</button>
+<style>
+.resizable { width: 150px; height: 150px; padding: 0.5em; }
+.resizable h3 { text-align: center; margin: 0; }
+</style>
 
-p  <video id="localVideo" autoplay height="200" width="200"></video>
-p  <video id="remoteVideo" autoplay height="200" width="200"></video>
+p Welcome to #{title}
+<div id="controls">
+<div id="rtc-controls">
+p <button onclick="WebRTC.init()">Init</button>
+  <button onclick="WebRTC.stop()">Stop</button>
+</div>
+<div id="session-controls" style="display: none;">
+p <button id='btnMic' onclick="WebRTC.toggleMic()">Microphone</button>
+  <button id='btnCam' onclick="WebRTC.toggleCamera()">Camera</button>
+</div>
+</div>
+p  <div id="localdiv" class="drag resizable " style="display: none;" >Local<br><video id="localVideo" autoplay height="200" width="200"></video></div>
+p  <div id="remotediv" class="drag resizable " style="display: none;">Remote<br><video id="remoteVideo" autoplay height="200" width="200" ></video></div>
 <audio id="audio2" autoplay="autoplay"></audio>
