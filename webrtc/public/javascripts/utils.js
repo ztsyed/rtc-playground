@@ -10,7 +10,7 @@ var host_id;
 var Utils={
 	socket:null,
 	initSocketIO: function(){
-		Utils.socket = io.connect('http://localhost:3000');
+		Utils.socket = io.connect('http://rtc.att.io');
 		Utils.socket.on('connect',function(data){
 			console.log("Connected: "+Utils.socket.socket.sessionid);
 		});
