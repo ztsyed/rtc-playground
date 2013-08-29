@@ -2,9 +2,11 @@ var host_local_pc = null;
 var localVideo = document.getElementById("localVideo");
 var remoteVideo = document.getElementById("remoteVideo");
 var localstream = null;
+var remotestream = null;
+
 var dtmfSender = null;
 var sdpConstraints = {'mandatory': {
-                      'OfferToReceiveAudio':false, 
+                      'OfferToReceiveAudio':true, 
                       'OfferToReceiveVideo':true }};
 var candidates=[];
 var remote;
@@ -22,7 +24,7 @@ WebRTC={
     
     trace("Requesting local stream");
     // Call into getUserMedia via the polyfill (adapter.js).
-    getUserMedia({audio:false, video:true},
+    getUserMedia({audio:true, video:true},
       WebRTC.gotStream, function() {});
   },
   gotStream:function(stream)
@@ -74,6 +76,7 @@ WebRTC={
   {
   // Call the polyfill wrapper to attach the media stream to this element.
   //attachMediaStream(audio2, e.stream);
+  remotestream=event.stream;
   trace("Received remote stream");
   document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
  // enableDtmfSender();
