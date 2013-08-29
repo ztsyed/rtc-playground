@@ -39,6 +39,6 @@ exports.getSession = function(req, res){
 			res.render('guest', { title: 'WebRTC Demo Guest View' });
 		}else
 		{
-			 res.render('index', { title: 'WebRTC Demo' });
+			res.redirect('/');
 		}
 };

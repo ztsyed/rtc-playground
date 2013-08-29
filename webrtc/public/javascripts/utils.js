@@ -32,6 +32,10 @@ var Utils={
 			WebRTC.onRemoteDescription(data);
 			remote_desc=data;
 		});
+		Utils.socket.on('hangup',function(data){
+			WebRTC.hangup(data);
+			remote_desc=data;
+		});
 	},
 	initSessionWithName: function(name)
 	{
@@ -41,33 +45,12 @@ var Utils={
 	{
 		Utils.socket.emit('iceCandidate',{id:remote_id,candidate:candidate});
 	},
-	updateSessionInfo:function(id,blob)
-	{
-		Utils.socket.emit('updateSessionInfo',{sid:id,sdesc:blob});
-		// $.ajax({
-		// 	type: "POST",
-		// 	url: '/sessions/'+id,
-		// 	data: blob,	
-		// 	success: Utils.onUpdateSuccess,
-		// 	dataType: 'json'
-		// });
-	},
-
-	onUpdateSuccess:function(data){
-		console.log("Session updated: "+data);
-	},
 	joinSession:function(id,callback)
 	{
 		Utils.socket.emit('getSessionInfo',id,function(id){
 			//console.log("Got SDP for "+id+ "\n"+sdp);
 			callback(id);
 		});
-		// $.ajax({
-		// 	type: "GET",
-		// 	url: '/sessions/'+id,
-		// 	success: callback,
-		// 	dataType: 'json'
-		// });
 	},
 	getSessionInfo:function(id,callback)
 	{
@@ -76,24 +59,10 @@ var Utils={
 			callback(data);
 			host_id=id;
 		});
-		// $.ajax({
-		// 	type: "GET",
-		// 	url: '/sessions/'+id,
-		// 	success: callback,
-		// 	dataType: 'json'
-		// });
 	},
 	sendRTCDescription:function(remote_id,description)
 	{
 		Utils.socket.emit('remoteRTCDescription',{id:remote_id,desc:description})
-	},
-	sendAnswerDescription:function(remote_id,description)
-	{
-		Utils.socket.emit('remoteRTCDescription',{id:remote_id,desc:description})
-	},
-	sendAnswer:function(id,blob)
-	{
-		Utils.socket.emit('sessionAnswer',{sid:id,sdesc:blob});
 	}
 
 }

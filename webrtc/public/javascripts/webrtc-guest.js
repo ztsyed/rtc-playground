@@ -41,7 +41,7 @@ WebRTC={
     }else{
       remote=client_id;
     }
-    Utils.sendAnswerDescription(remote,description);
+    Utils.sendRTCDescription(remote,description);
     guest_local_pc.setLocalDescription(description);
   },
   gotStream:function(stream)
@@ -86,10 +86,11 @@ WebRTC={
   document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
  // enableDtmfSender();
   },
-  stop:function()
+  hangup:function()
   {
     localstream.stop();
     localVideo.stop();
+    guest_local_pc=null;
   },
   addICECandidate:function(cand){
     guest_local_pc.addIceCandidate(new RTCIceCandidate(JSON.parse(cand)));
