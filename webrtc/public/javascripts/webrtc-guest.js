@@ -17,7 +17,7 @@ WebRTC={
 
   initWebRTC:function()
   {
-    var servers = null;
+    var servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
     var pc_constraints = {"optional": []};
     guest_local_pc = new RTCPeerConnection(servers,pc_constraints);
     trace("Created local peer connection object guest_local_pc");
