@@ -61,7 +61,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('iceCandidate',function(data){
     io.sockets.socket(data.id).emit('remoteIceCandidate',data.candidate);
   });
-  socket.on('hangup',function(data){
-    io.sockets.socket(data.id).emit('hangup',data.candidate);
+  socket.on('hangup',function(id){
+    io.sockets.socket(id).emit('hangup');
   });
 });

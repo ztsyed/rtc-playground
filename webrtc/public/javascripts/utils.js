@@ -34,7 +34,6 @@ var Utils={
 		});
 		Utils.socket.on('hangup',function(data){
 			WebRTC.hangup(data);
-			remote_desc=data;
 		});
 	},
 	initSessionWithName: function(name)
@@ -63,6 +62,10 @@ var Utils={
 	sendRTCDescription:function(remote_id,description)
 	{
 		Utils.socket.emit('remoteRTCDescription',{id:remote_id,desc:description})
+	},
+	hangup:function(remote_id)
+	{
+		Utils.socket.emit('hangup',remote_id);
 	}
 
 }

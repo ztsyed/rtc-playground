@@ -83,10 +83,16 @@ WebRTC={
     console.log("Got Client Connection")
     host_local_pc.createOffer(WebRTC.gotDescription);
   },
+  stop:function()
+  {
+ //   localstream.stop();
+    host_local_pc.close();
+    host_local_pc=null;
+    Utils.hangup(remote);
+  },
   hangup:function()
   {
-    localstream.stop();
-    localVideo.stop();
+//    localstream.stop();
     host_local_pc=null;
   },
   addICECandidate:function(cand){

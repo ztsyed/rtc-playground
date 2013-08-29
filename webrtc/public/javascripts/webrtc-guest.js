@@ -86,10 +86,16 @@ WebRTC={
   document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
  // enableDtmfSender();
   },
+  stop:function()
+  {
+//    localstream.stop();
+    guest_local_pc.close();
+    guest_local_pc=null;
+    Utils.hangup(remote);
+  },
   hangup:function()
   {
-    localstream.stop();
-    localVideo.stop();
+ //   localstream.stop();
     guest_local_pc=null;
   },
   addICECandidate:function(cand){
