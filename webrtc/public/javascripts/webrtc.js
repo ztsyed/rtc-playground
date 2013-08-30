@@ -23,8 +23,19 @@ WebRTC={
     host_local_pc.onaddstream = WebRTC.gotRemoteStream; 
     
     trace("Requesting local stream");
+  },
+  initCamera:function()
+  {
+    WebRTC.init();
     // Call into getUserMedia via the polyfill (adapter.js).
     getUserMedia({audio:true, video:true},
+      WebRTC.gotStream, function() {});
+  },
+  initScreen:function()
+  {
+    WebRTC.init();
+    // Call into getUserMedia via the polyfill (adapter.js).
+    getUserMedia({video:{mandatory:{chromeMediaSource:'screen'}}},
       WebRTC.gotStream, function() {});
   },
   gotStream:function(stream)

@@ -14,7 +14,20 @@ WebRTC={
   {
     WebRTC.initWebRTC();
   },
-
+  initCamera:function()
+  {
+    WebRTC.init();
+    // Call into getUserMedia via the polyfill (adapter.js).
+    getUserMedia({audio:true, video:true},
+      WebRTC.gotStream, function() {});
+  },
+  initScreen:function()
+  {
+    WebRTC.init();
+    // Call into getUserMedia via the polyfill (adapter.js).
+    getUserMedia({video:{mandatory:{chromeMediaSource:'screen'}}},
+      WebRTC.gotStream, function() {});
+  },
   initWebRTC:function()
   {
     var servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
@@ -25,9 +38,6 @@ WebRTC={
     guest_local_pc.onaddstream = WebRTC.gotRemoteStream; 
     
     trace("Requesting local stream");
-    // Call into getUserMedia via the polyfill (adapter.js).
-    getUserMedia({audio:true, video:true},
-      WebRTC.gotStream, function() {});
   },
   onRemoteDescription:function(description)
   {

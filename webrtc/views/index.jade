@@ -13,7 +13,8 @@ h1= title
 p Welcome to #{title}
 <div id="controls">
 <div id="rtc-controls">
-p <button onclick="WebRTC.init()">Init</button>
+p <button onclick="WebRTC.initCamera()">Init Camera</button>
+  <button onclick="WebRTC.initScreen()">Init Screen</button>
   <button onclick="WebRTC.stop()">Stop</button>
 </div>
 <div id="session-controls" style="display: none;">

@@ -5,9 +5,11 @@
 
 var express = require('express')
   , handler = require('./handler')
+  , fs = require('fs')
   , routes = require('./routes');
-
-var app = module.exports = express.createServer();
+var privateKey = fs.readFileSync('cert/key.pem').toString();
+var certificate = fs.readFileSync('cert/cert.pem').toString(); 
+var app = module.exports = express.createServer({key: privateKey, cert: certificate});
 io = require('socket.io').listen(app);
 // Configuration
 

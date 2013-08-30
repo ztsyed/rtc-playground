@@ -11,7 +11,7 @@ var host_id;
 var Utils={
 	socket:null,
 	initSocketIO: function(){
-		Utils.socket = io.connect('http://'+window.location.host);
+		Utils.socket = io.connect('https://'+window.location.host);
 		Utils.socket.on('connect',function(data){
 			console.log("Connected: "+Utils.socket.socket.sessionid);
 		});

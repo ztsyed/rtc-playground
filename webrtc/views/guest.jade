@@ -8,12 +8,13 @@ h1= title
 p Welcome to #{title}
 <div id="controls">
 <div id="rtc-controls">
-p <button onclick="WebRTC.init()">Init</button>
+p <button onclick="WebRTC.initCamera()">Init Camera</button>
+  <button onclick="WebRTC.initScreen()">Init Screen</button>
   <button onclick="WebRTC.stop()">Stop</button>
 </div>
 <div id="session-controls" style="display: none;">
 p <button id='btnMic' onclick="WebRTC.toggleMic()">Microphone</button>
-  <button id='btnCam' onclick="WebRTC.toggleCamera()">Camera</button>
+  <button id='btnCam' onclick="WebRTC.toggleCamera()">Video</button>
 </div>
 </div>
 p  <div id="localdiv" class="drag resizable " style="display: none;" >Local<br><video id="localVideo" autoplay height="200" width="200"></video></div>
