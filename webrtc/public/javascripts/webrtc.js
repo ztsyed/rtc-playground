@@ -1,6 +1,5 @@
 var host_local_pc = null;
-var localVideo = document.getElementById("localVideo");
-var remoteVideo = document.getElementById("remoteVideo");
+var localVideo, remoteVideo;
 var localstream = null;
 var remotestream = null;
 
@@ -22,7 +21,30 @@ WebRTC={
     host_local_pc.onicecandidate = WebRTC.iceCallback; 
     host_local_pc.onaddstream = WebRTC.gotRemoteStream; 
     
+    localVideo = document.getElementById("localVideo");
+
+    remoteVideo = document.getElementById("remoteVideo");
     trace("Requesting local stream");
+    localVideo.addEventListener("dblclick",function(e){
+      if(localVideo.height<=200){
+        localVideo.height=800;
+        localVideo.width=800;
+      }else
+      {
+        localVideo.height=200;
+        localVideo.width=200; 
+      }
+    });
+    remoteVideo.addEventListener("dblclick",function(e){
+      if(remoteVideo.height<=200){
+        remoteVideo.height=800;
+        remoteVideo.width=800;
+      }else
+      {
+        remoteVideo.height=200;
+        remoteVideo.width=200; 
+      }
+    });    
   },
   initCamera:function()
   {
