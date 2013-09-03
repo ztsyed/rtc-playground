@@ -13,6 +13,16 @@ WebRTC={
   init:function()
   {
     //WebRTC.initWebRTC();
+    localVideo.addEventListener("dblclick",function(e){
+      if(localVideo.height<=200){
+        localVideo.height=800;
+        localVideo.width=800;
+      }else
+      {
+        localVideo.height=200;
+        localVideo.width=200; 
+      }
+    });    
   },
   initCamera:function()
   {
@@ -145,7 +155,22 @@ MyPeerConnection.prototype={
   trace("Received remote stream");
   $("#remotediv").show(); 
   $("#session-controls").show(); 
-  document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
+  vDiv='<video id="'+this.client_id+'" autoplay height="200" width="200" src="'+URL.createObjectURL(event.stream)+'"></video>';
+      
+  $("#remotediv").append(vDiv);  
+  $("#remotediv").show();  
+//  vDiv.src=;
+
+  $("#"+this.client_id).dblclick(function(e){
+      if(this.height<=200){
+        this.height=800;
+        this.width=800;
+      }else
+      {
+        this.height=200;
+        this.width=200; 
+      }
+    }); 
  // enableDtmfSender();
   },
 }
