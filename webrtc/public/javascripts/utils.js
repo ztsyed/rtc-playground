@@ -26,13 +26,22 @@ var Utils={
 			client_id=data.client_id;
 			remote_desc=new RTCSessionDescription(data.sdesc);
 		});
-		Utils.socket.on('remoteIceCandidate',function(data){
+		Utils.socket.on('remoteIceCandidate',function(remote_id,data){
 			//console.log(data);
-			WebRTC.addICECandidate(data);
+			console.log("remoteIceCandidate:"+remote_id);
+			Utils.connections[remote_id].pc.addIceCandidate(new RTCIceCandidate(JSON.parse(data)));
 		});
-		Utils.socket.on('remoteRTCDescription',function(data){
-			WebRTC.onRemoteDescription(data);
-			remote_desc=data;
+		Utils.socket.on('remoteRTCDescription',function(remote_id,data){
+			console.log("remoteRTCDescription:"+remote_id);
+			if(data.type=="answer")
+			{//PeerConnection already exists
+				Utils.connections[remote_id].onRemoteDescription(data);
+
+			}else{
+				//Create PeerConnection
+    		Utils.connections[remote_id]=new MyPeerConnection(remote_id).createPeerConnection(localstream,data);
+    		Utils.connections[remote_id].answer();
+			}
 		});
 		Utils.socket.on('hangup',function(data){
 			WebRTC.hangup(data);
@@ -68,27 +77,6 @@ var Utils={
 	hangup:function(remote_id)
 	{
 		Utils.socket.emit('hangup',remote_id);
-	},
-	getPC:function(client_id,stream,onRemoteStream,onIceCallback)
-	{
-		servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
-    pc_constraints = {"optional": []};
-	  pc = new RTCPeerConnection(servers,pc_constraints);
-	  pc.remote_id=client_id;
-    trace("Created local peer connection object host_local_pc");
-    pc.onicecandidate = WebRTC.onIceCallback; 
-    pc.onaddstream = WebRTC.onRemoteStream; 
-    pc.addStream(stream);	
-    Utils.connections[client_id]=pc;
-    pc.gotDescription=function(description)
-    {
-       console.log(client_id);
-    	 pc.setLocalDescription(description);
-   		trace("Local description from host_local_pc \n" + description);
-	
-    Utils.sendRTCDescription(client_id,description); 	
-    }
-    pc.createOffer(pc.gotDescription);
 	}
 
 }

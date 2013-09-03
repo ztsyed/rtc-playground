@@ -28,16 +28,7 @@ WebRTC={
         localVideo.width=200; 
       }
     });
-    remoteVideo.addEventListener("dblclick",function(e){
-      if(remoteVideo.height<=200){
-        remoteVideo.height=800;
-        remoteVideo.width=800;
-      }else
-      {
-        remoteVideo.height=200;
-        remoteVideo.width=200; 
-      }
-    });    
+   
   },
   initCamera:function()
   {
@@ -64,57 +55,13 @@ WebRTC={
     document.getElementById("localVideo").src = URL.createObjectURL(stream);
     Utils.initSessionWithName('zia');
   },
-  gotDescription:function(description)
+  gotClientConnection:function(client_id)
   {
-    console.log(client_id);
-    Utils.connections[client_id].setLocalDescription(description);
-    trace("Local description from host_local_pc \n" + description);
-    if(host_id)
-    {
-      remote=host_id;
-    }else{
-      remote=client_id;
-    }
-    Utils.sendRTCDescription(remote,description);
-    
-  },
-  onRemoteDescription:function(description)
-  {
-    console.log("WebRTC:onRemoteDescription:"+description);
-    host_local_pc.setRemoteDescription(new RTCSessionDescription(description));
-  },
-  iceCallback:function(event)
-  {
-    console.log("Host::iceCallback");
-  if (event.candidate) {
-    if(host_id)
-    {
-      remote=host_id;
-    }else{
-      remote=client_id;
-    }
-    //console.log("iceCallback\n"+event.candidate);
-    Utils.sendIceCandidate(remote,JSON.stringify(event.candidate));
-    //host_local_pc.addIceCandidate(new RTCIceCandidate(event.candidate));
-    //trace("Local ICE candidate: \n" + event.candidate.candidate);
-    }
-  },
-  gotRemoteStream:function(event)
-  {
-  // Call the polyfill wrapper to attach the media stream to this element.
-  //attachMediaStream(audio2, e.stream);
-  remotestream=event.stream;
-  trace("Received remote stream");
-  $("#remotediv").show(); 
-  $("#session-controls").show(); 
-  document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
- // enableDtmfSender();
-  },
-  gotClientConnection:function()
-  {
-    console.log("Got Client Connection");
+    console.log("Got Client Connection: "+client_id);
     //host_local_pc.createOffer(WebRTC.gotDescription);
-    Utils.getPC(client_id,localstream,WebRTC.gotRemoteStream,WebRTC.iceCallback);
+    Utils.connections[client_id]=new MyPeerConnection(client_id).createPeerConnectionWithOffer(localstream);
+
+//    Utils.getPC(client_id,localstream,WebRTC.gotRemoteStream,WebRTC.iceCallback);
   },
   stop:function()
   {
@@ -127,9 +74,6 @@ WebRTC={
   {
 //    localstream.stop();
     host_local_pc=null;
-  },
-  addICECandidate:function(cand){
-    host_local_pc.addIceCandidate(new RTCIceCandidate(JSON.parse(cand)));
   },
   toggleCamera:function(){
     vtrack=localstream.getVideoTracks()[0];
@@ -153,11 +97,6 @@ WebRTC={
   }
 }
 
-
-function setCandidate(candidate){
-  host_local_pc.addIceCandidate(new RTCIceCandidate(candidate));
-}
-
 var host_sdp;
 function enableDtmfSender(){
   if (localstream != null) {
@@ -170,27 +109,73 @@ function enableDtmfSender(){
     trace("No Local Stream to create DTMF Sender\n");
   }
 }
+function MyPeerConnection(client_id){
+  this.client_id=client_id;
+  servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+  pc_constraints = {"optional": []};
+  this.pc = new RTCPeerConnection(servers,pc_constraints);
+}
 
-MyPeerConnection={
-  getPeerConnection:function(client_id,stream,onRemoteStream,onIceCallback)
+MyPeerConnection.prototype={
+  createPeerConnectionWithOffer:function(stream)
   {
-    servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
-    pc_constraints = {"optional": []};
-    pc = new RTCPeerConnection(servers,pc_constraints);
-    pc.remote_id=client_id;
+    this.pc.remote_id=client_id;
     trace("Created local peer connection object host_local_pc");
-    pc.onicecandidate = WebRTC.onIceCallback; 
-    pc.onaddstream = WebRTC.onRemoteStream; 
-    pc.addStream(stream); 
-    Utils.connections[client_id]=pc;
-    pc.gotDescription=function(description)
-    {
-       console.log(client_id);
-       pc.setLocalDescription(description);
-      trace("Local description from host_local_pc \n" + description);
-  
-    Utils.sendRTCDescription(client_id,description);  
+    this.pc.onicecandidate = MyPeerConnection.prototype.onIceCallback.bind(this); 
+    this.pc.onaddstream = MyPeerConnection.prototype.onRemoteStream.bind(this); 
+    this.pc.addStream(stream); 
+    this.pc.createOffer(MyPeerConnection.prototype.gotDescription.bind(this));
+    return this;
+  },
+    gotDescription:function(description)
+  {
+    console.log(this.client_id);
+    trace("Local description from host_local_pc \n" + description);
+    this.pc.setLocalDescription(description);
+    trace("Local description Set");
+    Utils.sendRTCDescription(this.client_id,description);
+    
+  },
+  onRemoteDescription:function(description)
+  {
+    console.log("WebRTC:onRemoteDescription:"+description);
+    this.pc.setRemoteDescription(new RTCSessionDescription(description));
+    trace("Remote description Set");
+  },
+  onIceCallback:function(event)
+  {
+  console.log("Host::iceCallback");
+  if (event.candidate) {
+    console.log("iceCallback\n"+event.candidate);
+    Utils.sendIceCandidate(this.client_id,JSON.stringify(event.candidate));
+    //host_local_pc.addIceCandidate(new RTCIceCandidate(event.candidate));
+    //trace("Local ICE candidate: \n" + event.candidate.candidate);
     }
-    pc.createOffer(pc.gotDescription);
-  }
+  },
+  onRemoteStream:function(event)
+  {
+  // Call the polyfill wrapper to attach the media stream to this element.
+  //attachMediaStream(audio2, e.stream);
+  remotestream=event.stream;
+  trace("Received remote stream");
+  $("#remotediv").show(); 
+  $("#session-controls").show(); 
+  vDiv='<video id="'+this.client_id+'" autoplay height="200" width="200" src="'+URL.createObjectURL(event.stream)+'"></video>';
+      
+  $("#remotediv").append(vDiv);  
+  $("#remotediv").show();  
+//  vDiv.src=;
+
+  $("#"+this.client_id).dblclick(function(e){
+      if(this.height<=200){
+        this.height=800;
+        this.width=800;
+      }else
+      {
+        this.height=200;
+        this.width=200; 
+      }
+    }); 
+ // enableDtmfSender();
+  },
 }

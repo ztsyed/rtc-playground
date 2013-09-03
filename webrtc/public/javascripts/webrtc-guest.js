@@ -1,4 +1,4 @@
-var guest_local_pc = null;
+
 var localVideo = document.getElementById("localVideo");
 var remoteVideo = document.getElementById("remoteVideo");
 var localstream = null;
@@ -12,7 +12,7 @@ WebRTC={
   candidates:[],
   init:function()
   {
-    WebRTC.initWebRTC();
+    //WebRTC.initWebRTC();
   },
   initCamera:function()
   {
@@ -39,68 +39,18 @@ WebRTC={
     
     trace("Requesting local stream");
   },
-  onRemoteDescription:function(description)
-  {
-    console.log("WebRTC:onRemoteDescription:"+description);
-    guest_local_pc.setRemoteDescription(new RTCSessionDescription(description));
-    guest_local_pc.createAnswer(WebRTC.answerDescription);
-  },
-  answerDescription:function(description)
-  {
-    if(host_id)
-    {
-      remote=host_id;
-    }else{
-      remote=client_id;
-    }
-    Utils.sendRTCDescription(remote,description);
-    guest_local_pc.setLocalDescription(description);
-  },
+
   gotStream:function(stream)
   {
     trace("Received local stream");
     // Call the polyfill wrapper to attach the media stream to this element.
     localstream = stream;
-    guest_local_pc.addStream(localstream);
     trace("Adding Local Stream to peer connection");
     $("#localdiv").show();      
     document.getElementById("localVideo").src = URL.createObjectURL(stream);
     Utils.joinSession('zia',function(data){
       host_id=data;
     });
-  },
-  gotDescription:function(description)
-  {
-    host_sdp=description;
-    guest_local_pc.setLocalDescription(description);
-    trace("Local description from guest_local_pc \n" + description);   
-  },
-  iceCallback:function(event)
-  {
-    console.log("Guest::iceCallback");
-  if (event.candidate) {
-    if(host_id)
-    {
-      remote=host_id;
-    }else{
-      remote=client_id;
-    }
-    console.log("iceCallback\n"+event.candidate);
-    Utils.sendIceCandidate(remote,JSON.stringify(event.candidate));
-    //host_local_pc.addIceCandidate(new RTCIceCandidate(event.candidate));
-    //trace("Local ICE candidate: \n" + event.candidate.candidate);
-    }
-  },
-  gotRemoteStream:function(event)
-  {
-  // Call the polyfill wrapper to attach the media stream to this element.
-  //attachMediaStream(audio2, e.stream);
-  remotestream=event.stream;
-  trace("Received remote stream");
-  $("#remotediv").show(); 
-  $("#session-controls").show(); 
-  document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
- // enableDtmfSender();
   },
   stop:function()
   {
@@ -113,9 +63,6 @@ WebRTC={
   {
  //   localstream.stop();
     guest_local_pc=null;
-  },
-  addICECandidate:function(cand){
-    guest_local_pc.addIceCandidate(new RTCIceCandidate(JSON.parse(cand)));
   },
   toggleCamera:function(){
     vtrack=localstream.getVideoTracks()[0];
@@ -139,11 +86,6 @@ WebRTC={
   }
 }
 
-
-function setCandidate(candidate){
-  guest_local_pc.addIceCandidate(new RTCIceCandidate(candidate));
-}
-
 var host_sdp;
 function enableDtmfSender(){
   if (localstream != null) {
@@ -155,4 +97,55 @@ function enableDtmfSender(){
   else {
     trace("No Local Stream to create DTMF Sender\n");
   }
+}
+function MyPeerConnection(client_id){
+  this.client_id=client_id;
+  servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+  pc_constraints = {"optional": []};
+  this.pc = new RTCPeerConnection(servers,pc_constraints);
+}
+
+MyPeerConnection.prototype={
+  createPeerConnection:function(stream,description)
+  {
+    servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+    this.pc.remote_id=client_id;
+    trace("Created local peer connection object "+this.client_id);
+    this.pc.onicecandidate = MyPeerConnection.prototype.onIceCallback.bind(this); 
+    this.pc.onaddstream = MyPeerConnection.prototype.onRemoteStream.bind(this); 
+    this.pc.addStream(stream); 
+    this.pc.setRemoteDescription(new RTCSessionDescription(description));
+    trace("Remote description Set");
+    return this;
+  },
+  answer:function(){
+    this.pc.createAnswer(MyPeerConnection.prototype.answerDescription.bind(this));
+  },
+  answerDescription:function(description)
+  {
+    Utils.sendRTCDescription(this.client_id,description);
+    this.pc.setLocalDescription(description);
+    trace("Local description Set");
+  },
+  onIceCallback:function(event)
+  {
+    console.log("Host::iceCallback");
+  if (event.candidate) {
+    //console.log("iceCallback\n"+event.candidate);
+    Utils.sendIceCandidate(this.client_id,JSON.stringify(event.candidate));
+    //host_local_pc.addIceCandidate(new RTCIceCandidate(event.candidate));
+    //trace("Local ICE candidate: \n" + event.candidate.candidate);
+    }
+  },
+  onRemoteStream:function(event)
+  {
+  // Call the polyfill wrapper to attach the media stream to this element.
+  //attachMediaStream(audio2, e.stream);
+  remotestream=event.stream;
+  trace("Received remote stream");
+  $("#remotediv").show(); 
+  $("#session-controls").show(); 
+  document.getElementById("remoteVideo").src = URL.createObjectURL(event.stream);
+ // enableDtmfSender();
+  },
 }
