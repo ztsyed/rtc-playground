@@ -10,6 +10,7 @@ var client_id;
 var host_id;
 var Utils={
 	socket:null,
+	connections:{},
 	initSocketIO: function(){
 		Utils.socket = io.connect('https://'+window.location.host);
 		Utils.socket.on('connect',function(data){
@@ -17,7 +18,7 @@ var Utils={
 		});
 		Utils.socket.on('initWebRTCSession',function(data){
 			client_id=data;
-			WebRTC.gotClientConnection();
+			WebRTC.gotClientConnection(client_id);
 			//alert('SessionInit: '+client_id);
 		});
 		Utils.socket.on('onSessionAnswer',function(data){
@@ -67,6 +68,27 @@ var Utils={
 	hangup:function(remote_id)
 	{
 		Utils.socket.emit('hangup',remote_id);
+	},
+	getPC:function(client_id,stream,onRemoteStream,onIceCallback)
+	{
+		servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+    pc_constraints = {"optional": []};
+	  pc = new RTCPeerConnection(servers,pc_constraints);
+	  pc.remote_id=client_id;
+    trace("Created local peer connection object host_local_pc");
+    pc.onicecandidate = WebRTC.onIceCallback; 
+    pc.onaddstream = WebRTC.onRemoteStream; 
+    pc.addStream(stream);	
+    Utils.connections[client_id]=pc;
+    pc.gotDescription=function(description)
+    {
+       console.log(client_id);
+    	 pc.setLocalDescription(description);
+   		trace("Local description from host_local_pc \n" + description);
+	
+    Utils.sendRTCDescription(client_id,description); 	
+    }
+    pc.createOffer(pc.gotDescription);
 	}
 
 }

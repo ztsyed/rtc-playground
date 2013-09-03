@@ -7,20 +7,13 @@ var dtmfSender = null;
 var sdpConstraints = {'mandatory': {
                       'OfferToReceiveAudio':true, 
                       'OfferToReceiveVideo':true }};
-var candidates=[];
+var candidates={};
 var remote;
 
 WebRTC={
 
   init:function()
   {
-    var servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
-    var pc_constraints = {"optional": []};
-    host_local_pc = new RTCPeerConnection(servers,pc_constraints);
-    trace("Created local peer connection object host_local_pc");
-    host_local_pc.onicecandidate = WebRTC.iceCallback; 
-    host_local_pc.onaddstream = WebRTC.gotRemoteStream; 
-    
     localVideo = document.getElementById("localVideo");
 
     remoteVideo = document.getElementById("remoteVideo");
@@ -65,7 +58,7 @@ WebRTC={
     trace("Received local stream");
     // Call the polyfill wrapper to attach the media stream to this element.
     localstream = stream;
-    host_local_pc.addStream(localstream);
+//    host_local_pc.addStream(localstream);
     trace("Adding Local Stream to peer connection");  
     $("#localdiv").show();  
     document.getElementById("localVideo").src = URL.createObjectURL(stream);
@@ -73,8 +66,8 @@ WebRTC={
   },
   gotDescription:function(description)
   {
-    host_sdp=description;
-    host_local_pc.setLocalDescription(description);
+    console.log(client_id);
+    Utils.connections[client_id].setLocalDescription(description);
     trace("Local description from host_local_pc \n" + description);
     if(host_id)
     {
@@ -119,8 +112,9 @@ WebRTC={
   },
   gotClientConnection:function()
   {
-    console.log("Got Client Connection")
-    host_local_pc.createOffer(WebRTC.gotDescription);
+    console.log("Got Client Connection");
+    //host_local_pc.createOffer(WebRTC.gotDescription);
+    Utils.getPC(client_id,localstream,WebRTC.gotRemoteStream,WebRTC.iceCallback);
   },
   stop:function()
   {
@@ -174,5 +168,29 @@ function enableDtmfSender(){
   }
   else {
     trace("No Local Stream to create DTMF Sender\n");
+  }
+}
+
+MyPeerConnection={
+  getPeerConnection:function(client_id,stream,onRemoteStream,onIceCallback)
+  {
+    servers = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+    pc_constraints = {"optional": []};
+    pc = new RTCPeerConnection(servers,pc_constraints);
+    pc.remote_id=client_id;
+    trace("Created local peer connection object host_local_pc");
+    pc.onicecandidate = WebRTC.onIceCallback; 
+    pc.onaddstream = WebRTC.onRemoteStream; 
+    pc.addStream(stream); 
+    Utils.connections[client_id]=pc;
+    pc.gotDescription=function(description)
+    {
+       console.log(client_id);
+       pc.setLocalDescription(description);
+      trace("Local description from host_local_pc \n" + description);
+  
+    Utils.sendRTCDescription(client_id,description);  
+    }
+    pc.createOffer(pc.gotDescription);
   }
 }
