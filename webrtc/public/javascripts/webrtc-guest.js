@@ -1,6 +1,5 @@
 
-var localVideo = document.getElementById("localVideo");
-var remoteVideo = document.getElementById("remoteVideo");
+var localVideo,remoteVideo;
 var localstream = null;
 var remotestream = null;
 
@@ -13,16 +12,7 @@ WebRTC={
   init:function()
   {
     //WebRTC.initWebRTC();
-    localVideo.addEventListener("dblclick",function(e){
-      if(localVideo.height<=200){
-        localVideo.height=800;
-        localVideo.width=800;
-      }else
-      {
-        localVideo.height=200;
-        localVideo.width=200; 
-      }
-    });    
+   
   },
   initCamera:function()
   {
@@ -52,6 +42,17 @@ WebRTC={
 
   gotStream:function(stream)
   {
+    localVideo = document.getElementById("localVideo");
+    localVideo.addEventListener("dblclick",function(e){
+      if(localVideo.height<=200){
+        localVideo.height=800;
+        localVideo.width=800;
+      }else
+      {
+        localVideo.height=200;
+        localVideo.width=200; 
+      }
+    }); 
     trace("Received local stream");
     // Call the polyfill wrapper to attach the media stream to this element.
     localstream = stream;
